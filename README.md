@@ -1,6 +1,9 @@
-# NOP Boiler Room Listing Generator
+# NOP Boiler Maker — Mythic+ Group Listing Generator
 
 A web-based tool for creating formatted Discord group listings for World of Warcraft Mythic+ dungeon runs.
+
+- Live site: https://xoronics.github.io/nop-boiler-maker/
+- Repo: https://github.com/Xoronics/nop-boiler-maker
 
 ## Features
 
