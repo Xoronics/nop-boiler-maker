@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOP Boiler Room Listing Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #5865F2;
+            --primary-dark: #4752C4;
+            --secondary: #57F287;
+            --background: #2C2F33;
+            --surface: #36393F;
+            --surface-light: #40444B;
+            --text: #FFFFFF;
+            --text-muted: #B9BBBE;
+            --border: #202225;
+            --success: #57F287;
+            --danger: #ED4245;
+            --shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1c1f 0%, #2C2F33 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 16px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--surface-light);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--surface-light);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .role-option {
+            background: var(--surface-light);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            min-height: 72px;
+        }
+
+        .role-option:hover {
+            border-color: var(--primary);
+        }
+
+        .role-option.selected {
+            border-color: var(--secondary);
+            background: rgba(87, 242, 135, 0.1);
+        }
+
+        .role-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--secondary);
+        }
+
+        .role-option label {
+            margin: 0;
+            cursor: pointer;
+            text-transform: none;
+            font-size: 1rem;
+            color: var(--text);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .role-count {
+            width: 64px;
+            padding: 8px 10px;
+            background: var(--background);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .role-count:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Quick requirement chips */
+        .quick-reqs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .quick-req-option {
+            background: var(--surface-light);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            gap: 10px;
+            min-height: 52px;
+        }
+
+        .quick-req-option.selected {
+            border-color: var(--secondary);
+            background: rgba(87, 242, 135, 0.1);
+        }
+
+        .quick-req-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--secondary);
+        }
+
+        .quick-req-option label {
+            margin: 0;
+            cursor: pointer;
+            text-transform: none;
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        select option {
+            background: var(--surface-light);
+            color: var(--text);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--text);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .output-box {
+            background: var(--background);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 300px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            position: relative;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .copy-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--success);
+            color: var(--background);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .copy-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .info-box {
+            background: rgba(88, 101, 242, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 4px 0;
+        }
+
+        .info-box code {
+            background: var(--surface-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: var(--secondary);
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Smooth fade-in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Respect reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            .panel { animation: none !important; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface-light);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚔️ NOP Boiler Room Listing Generator</h1>
+            <p class="subtitle">Create perfectly formatted Discord group listings for Mythic+ runs • TWW Season 3</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Input Form -->
+            <div class="panel">
+                <h2>📝 Group Details</h2>
+
+                <div class="info-box">
+                    <p><strong>Tip:</strong> Use <code>~~text~~</code> to strikethrough when group is full.</p>
+                    <p><strong>Role Tags:</strong> Automatically generates Discord role pings based on key level</p>
+                    <p>• Keys 12-14: <code>@TANK-M12-14</code>, <code>@HEALER-M12-14</code>, <code>@DPS-M12-14</code></p>
+                    <p>• Keys 15+: <code>@TANK-M15+</code>, <code>@HEALER-M15+</code>, <code>@DPS-M15+</code></p>
+                </div>
+
+                <form id="groupForm">
+                    <div class="form-group">
+                        <label for="groupName">Group Name</label>
+                        <input type="text" id="groupName" placeholder="e.g., Chill Weekly Run" autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dungeon">Dungeon</label>
+                            <select id="dungeon">
+                                <option value="">Select a dungeon...</option>
+                                <option value="Eco-Dome Al'dani">Eco-Dome Al'dani</option>
+                                <option value="Ara-Kara, City of Threads">Ara-Kara, City of Threads</option>
+                                <option value="The Dawnbreaker">The Dawnbreaker</option>
+                                <option value="Operation: Floodgate">Operation: Floodgate</option>
+                                <option value="Priory of the Sacred Flame">Priory of the Sacred Flame</option>
+                                <option value="Tazavesh: Streets of Wonder">Tazavesh: Streets of Wonder</option>
+                                <option value="Tazavesh: So'leah's Gambit">Tazavesh: So'leah's Gambit</option>
+                                <option value="Halls of Atonement">Halls of Atonement</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="keyLevel">Key Level</label>
+                            <input type="number" id="keyLevel" min="12" max="30" value="12" placeholder="12">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="timing">Timing Expectations</label>
+                        <select id="timing">
+                            <option value="Completion (no timer)">Completion (no timer)</option>
+                            <option value="Timed" selected>Timed</option>
+                            <option value="Timed +2">Timed +2</option>
+                            <option value="Timed +3">Timed +3</option>
+                            <option value="Push key as high as possible">Push key as high as possible</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Looking For (select roles to ping)</label>
+                        <div class="role-selector">
+                            <div class="role-option" onclick="toggleRole('tank')">
+                                <input type="checkbox" id="role-tank" onchange="updateRoles()" onclick="event.stopPropagation()">
+                                <label for="role-tank" onclick="event.stopPropagation()">🛡️ Tank</label>
+                                <input type="number" class="role-count" id="count-tank" min="1" max="2" value="1" onchange="updateRoles()" onclick="event.stopPropagation()">
+                            </div>
+                            <div class="role-option" onclick="toggleRole('healer')">
+                                <input type="checkbox" id="role-healer" onchange="updateRoles()" onclick="event.stopPropagation()">
+                                <label for="role-healer" onclick="event.stopPropagation()">💚 Healer</label>
+                                <input type="number" class="role-count" id="count-healer" min="1" max="2" value="1" onchange="updateRoles()" onclick="event.stopPropagation()">
+                            </div>
+                            <div class="role-option" onclick="toggleRole('dps')">
+                                <input type="checkbox" id="role-dps" onchange="updateRoles()" onclick="event.stopPropagation()">
+                                <label for="role-dps" onclick="event.stopPropagation()">⚔️ DPS</label>
+                                <input type="number" class="role-count" id="count-dps" min="1" max="3" value="3" onchange="updateRoles()" onclick="event.stopPropagation()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requirements">Specific Requirements (Optional)</label>
+                        <textarea id="requirements" placeholder="e.g., know mechanics, have lust/hero, chill vibes"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quick Requirements</label>
+                        <div class="quick-reqs" id="quick-reqs">
+                            <div class="quick-req-option">
+                                <input type="checkbox" id="qreq-lust">
+                                <label for="qreq-lust">Lust/Hero</label>
+                            </div>
+                            <div class="quick-req-option">
+                                <input type="checkbox" id="qreq-cr">
+                                <label for="qreq-cr">Battle Res (CR)</label>
+                            </div>
+                            <div class="quick-req-option">
+                                <input type="checkbox" id="qreq-timedminus1">
+                                <label for="qreq-timedminus1">Timed -1</label>
+                            </div>
+                            <div class="quick-req-option">
+                                <input type="checkbox" id="qreq-chill">
+                                <label for="qreq-chill">Chill vibes</label>
+                            </div>
+                            <div class="quick-req-option">
+                                <input type="checkbox" id="qreq-voice">
+                                <label for="qreq-voice">Voice comms</label>
+                            </div>
+                            <div class="quick-req-option">
+                                <input type="checkbox" id="qreq-consumables">
+                                <label for="qreq-consumables">Pots/enchants</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Group Password</label>
+                        <input type="text" id="password" placeholder="Leave empty to auto-generate (e.g., Thrall42)" autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="clearForm()">Clear</button>
+                        <button type="button" class="btn-primary" onclick="generateOutput()">Generate</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Output Preview -->
+            <div class="panel">
+                <h2>📋 Generated Output</h2>
+                <div class="output-box" id="output" role="status" aria-live="polite">
+<span style="color: var(--text-muted);">Fill in the form and click "Generate" to create your group listing...</span>
+                </div>
+                <div class="copy-indicator" id="copyIndicator" role="status" aria-live="polite">✓ Copied to clipboard!</div>
+                <div class="button-group">
+                    <button type="button" class="btn-primary" onclick="copyToClipboard()">Copy to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WoW-themed word bank for password generation (single words only)
+        const wowWords = {
+            cities: ['Ironforge', 'Stormwind', 'Orgrimmar', 'Dalaran', 'Valdrakken', 'Dornogal',
+                     'Boralus', 'Zuldazar', 'Oribos', 'Shattrath', 'Silvermoon', 'Exodar',
+                     'Thunderbluff', 'Undercity', 'Darnassus', 'Gilneas', 'Suramar', 'Dazaralor',
+                     'Teldrassil', 'Gnomeregan', 'Karazhan', 'Lordaeron', 'Stratholme', 'Gadgetzan',
+                     'Ratchet', 'Everlook', 'Stonard', 'Theramore', 'Talonbranch', 'Nighthaven',
+                     'Cenarion', 'Bloodhoof', 'Brill', 'Goldshire', 'Crossroads', 'Menethil',
+                     'Southshore', 'Sentinel', 'Astranaar', 'Auberdine', 'Darkshire', 'Lakeshire',
+                     'Hammerfall', 'Kargath', 'Thorium', 'Revantusk', 'Wildhammer', 'Stromgarde',
+                     'Alterac', 'Shadowfang', 'Scarlet', 'Hearthglen'],
+
+            zones: ['Elwynn', 'Westfall', 'Redridge', 'Duskwood', 'Ashenvale', 'Darkshore',
+                    'Barrens', 'Durotar', 'Mulgore', 'Tirisfal', 'Silverpine', 'Hillsbrad',
+                    'Arathi', 'Wetlands', 'Badlands', 'Tanaris', 'Feralas', 'Desolace',
+                    'Stonetalon', 'Dustwallow', 'Azshara', 'Felwood', 'Winterspring', 'Silithus',
+                    'Ungoro', 'Plaguelands', 'Hinterlands', 'Hellfire', 'Zangarmarsh', 'Terokkar',
+                    'Nagrand', 'Netherstorm', 'Shadowmoon', 'Borean', 'Dragonblight', 'Zuldrak',
+                    'Sholazar', 'Icecrown', 'Crystalsong', 'Vashj', 'Hyjal', 'Deepholm', 'Uldum',
+                    'Jade', 'Dread', 'Kun', 'Townlong', 'Vale', 'Frostfire', 'Gorgrond',
+                    'Talador', 'Spires', 'Highmountain', 'Stormheim', 'Suramar', 'Azsuna'],
+
+            characters: ['Thrall', 'Jaina', 'Anduin', 'Sylvanas', 'Velen', 'Magni', 'Khadgar',
+                         'Alexstrasza', 'Chromie', 'Baine', 'Varian', 'Tyrande', 'Malfurion',
+                         'Illidan', 'Arthas', 'Uther', 'Tirion', 'Garrosh', 'Cairne', 'Genn',
+                         'Muradin', 'Brann', 'Moira', 'Alleria', 'Turalyon', 'Yrel', 'Maraad',
+                         'Nobundo', 'Aggra', 'Rehgar', 'Valeera', 'Broll', 'Ysera', 'Nozdormu',
+                         'Malygos', 'Neltharion', 'Wrathion', 'Ebonhorn', 'Kalecgos', 'Senegos',
+                         'Stellagosa', 'Vyranoth', 'Fyrakk', 'Iridikron', 'Odyn', 'Helya',
+                         'Loken', 'Thorim', 'Hodir', 'Freya', 'Mimiron', 'Medivh', 'Aegwynn',
+                         'Rhonin', 'Krasus', 'Antonidas', 'Gul\'dan', 'Grommash', 'Durotan'],
+
+            bosses: ['Ragnaros', 'Onyxia', 'Nefarian', 'Hakkar', 'Azuregos', 'Kazzak',
+                     'Sapphiron', 'Malygos', 'Algalon', 'Sindragosa', 'Deathwing', 'Madness',
+                     'Spine', 'Neferset', 'Conclave', 'Ascendant', 'Shannox', 'Rhyolith',
+                     'Alysrazor', 'Baleroc', 'Majordomo', 'Morchok', 'Warlord', 'Hagara',
+                     'Ultraxion', 'Blackhorn', 'Zonozz', 'Garalon', 'Meljarak', 'Unsok',
+                     'Shekzeer', 'Tsulong', 'Protectors', 'Norushen', 'Galakras', 'Nazgrim',
+                     'Malkorok', 'Spoils', 'Thok', 'Paragons', 'Garrosh', 'Kargath', 'Butcher',
+                     'Tectus', 'Brackenspore', 'Thogar', 'Blackhand', 'Mannoroth', 'Archimonde',
+                     'Nythendra', 'Ursoc', 'Dragons', 'Cenarius', 'Xavius', 'Skorpyron', 'Trilliax'],
+
+            weapons: ['Ashbringer', 'Frostmourne', 'Sulfuras', 'Thunderfury', 'Warglaives',
+                      'Atiesh', 'Shadowmourne', 'Gorehowl', 'Doomhammer', 'Dragonwrath',
+                      'Shalamayne', 'Twinblades', 'Dreadblades', 'Aluneth', 'Ebonchill',
+                      'Talonclaw', 'Titanstrike', 'Truthguard', 'Warswords', 'Soulrend',
+                      'Ulthalesh', 'Aldrachi', 'Illidari', 'Stormfist', 'Underlight',
+                      'Kingslayers', 'Fangs', 'Apocalypse', 'Soulflayer', 'Bladefist',
+                      'Bloodfang', 'Nightslayer', 'Earthfury', 'Giantstalker', 'Arcanist',
+                      'Felheart', 'Cenarion', 'Lawbringer', 'Might', 'Dreadnaught',
+                      'Bonescythe', 'Dreamwalker', 'Frostfire', 'Plagueheart', 'Redemption',
+                      'Scourgelord', 'Sanctified', 'Onslaught', 'Worldbreaker', 'Stormrider'],
+
+            classes: ['Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest', 'Shaman',
+                      'Mage', 'Warlock', 'Monk', 'Druid', 'Evoker', 'Arms', 'Fury',
+                      'Protection', 'Holy', 'Retribution', 'Marksmanship', 'Survival',
+                      'Assassination', 'Outlaw', 'Subtlety', 'Discipline', 'Shadow',
+                      'Elemental', 'Enhancement', 'Restoration', 'Arcane', 'Fire', 'Frost',
+                      'Affliction', 'Demonology', 'Destruction', 'Brewmaster', 'Mistweaver',
+                      'Windwalker', 'Balance', 'Feral', 'Guardian', 'Havoc', 'Vengeance',
+                      'Blood', 'Unholy', 'Devastation', 'Preservation', 'Augmentation',
+                      'Champion', 'Gladiator', 'Duelist', 'Rival', 'Challenger', 'Combatant'],
+
+            creatures: ['Human', 'Dwarf', 'Gnome', 'Draenei', 'Worgen', 'Pandaren', 'Orc',
+                        'Undead', 'Tauren', 'Troll', 'Goblin', 'Nightborne', 'Vulpera',
+                        'Earthen', 'Dracthyr', 'Forsaken', 'Naga', 'Murloc', 'Kobold',
+                        'Gnoll', 'Ogre', 'Furbolg', 'Centaur', 'Harpy', 'Quilboar',
+                        'Makrura', 'Nerubians', 'Vrykul', 'Tuskarr', 'Wolvar', 'Gorloc',
+                        'Hozen', 'Jinyu', 'Mogu', 'Mantid', 'Yaungol', 'Arakkoa', 'Botani',
+                        'Saberon', 'Ethereal', 'Broken', 'Demon', 'Elemental', 'Dragon',
+                        'Wyvern', 'Gryphon', 'Hippogryph', 'Treant', 'Satyr', 'Dryad'],
+
+            spells: ['Fireball', 'Frostbolt', 'Pyroblast', 'Polymorph', 'Blink', 'Evocation',
+                     'Blizzard', 'Flamestrike', 'Bloodlust', 'Heroism', 'Earthquake',
+                     'Thunderstorm', 'Hex', 'Reincarnation', 'Rejuvenation', 'Regrowth',
+                     'Tranquility', 'Innervate', 'Moonfire', 'Starfire', 'Wrath', 'Starfall',
+                     'Starsurge', 'Typhoon', 'Cyclone', 'Barkskin', 'Frenzied', 'Mangle',
+                     'Thrash', 'Swipe', 'Rake', 'Rip', 'Shred', 'Prowl', 'Pounce',
+                     'Ravage', 'Maim', 'Bladestorm', 'Execute', 'Charge', 'Slam',
+                     'Bloodthirst', 'Rampage', 'Crusade', 'Avenging', 'Consecration', 'Judgment',
+                     'Exorcism', 'Hammer', 'Shield', 'Smite', 'Penance', 'Rapture'],
+
+            mounts: ['Invincible', 'Flametalon', 'Pureblood', 'Vitreous', 'Midnight',
+                     'Dreadsteed', 'Felsteed', 'Rivendare', 'Deathcharger', 'Netherwing',
+                     'Ironbound', 'Frostbrood', 'Bloodbathed', 'Phosphorescent', 'Onyxian',
+                     'Firehawk', 'Protodrake', 'Celestial', 'Thundering', 'Heavenly',
+                     'Sunhide', 'Vicious', 'Prestigious', 'Vindictive', 'Fearless',
+                     'Cruel', 'Ferocious', 'Sinful', 'Unchained', 'Corridor', 'Blanchy',
+                     'Sinrunner', 'Cartel', 'Tazavesh', 'Slime', 'Glacial', 'Inferno',
+                     'Volcanic', 'Cindermane', 'Smoldering', 'Loyal', 'Faithful', 'Swift',
+                     'Armored', 'Great', 'Magnificent', 'Exalted', 'Illustrious', 'Renowned'],
+
+            dungeons: ['Shadowfang', 'Deadmines', 'Wailing', 'Scarlet', 'Uldaman', 'Maraudon',
+                       'Sunken', 'Blackfathom', 'Razorfen', 'Zulfarrak', 'Stratholme',
+                       'Scholomance', 'Diremaul', 'Blackrock', 'Hellfire', 'Shattered',
+                       'Steamvault', 'Underbog', 'Arcatraz', 'Botanica', 'Mechanar',
+                       'Magisters', 'Crypts', 'Ramparts', 'Furnace', 'Nexus', 'Azjol',
+                       'Drak', 'Gundrak', 'Utgarde', 'Violet', 'Culling', 'Halls', 'Pit',
+                       'Forge', 'Oculus', 'Vortex', 'Pinnacle', 'Throne', 'Shadowmoon',
+                       'Grimrail', 'Auchindoun', 'Skyreach', 'Everbloom', 'Bloodmaul', 'Depot',
+                       'Docks', 'Iron', 'Upper', 'Lower', 'Nelth', 'Maw', 'Plaguefall'],
+
+            raids: ['Naxxramas', 'Karazhan', 'Magtheridon', 'Serpentshrine', 'Ulduar',
+                    'Firelands', 'Highmaul', 'Nighthold', 'Antorus', 'Uldir', 'Aberrus',
+                    'Amirdrassil', 'Sepulcher', 'Citadel', 'Sanctum', 'Nathria', 'Palace',
+                    'Crucible', 'Foundry', 'Nightmare', 'Nyalotha', 'Incarnates', 'Vault',
+                    'Bastion', 'Descent', 'Baradin', 'Terrace', 'Vaults', 'Pandaria',
+                    'Orgrimmar', 'Thunder', 'Sargeras', 'Tomb', 'Dazaralor', 'Storms',
+                    'Azeroth', 'Sunwell', 'Temple', 'Plateau', 'Archavon', 'Sanctum',
+                    'Eternity', 'Obsidian', 'Ruby', 'Twilight', 'Winds', 'Soul', 'Valor'],
+
+            professions: ['Blacksmithing', 'Leatherworking', 'Tailoring', 'Engineering',
+                          'Alchemy', 'Enchanting', 'Jewelcrafting', 'Inscription', 'Herbalism',
+                          'Mining', 'Skinning', 'Archaeology', 'Fishing', 'Cooking',
+                          'Armorsmith', 'Weaponsmith', 'Dragonscale', 'Elemental', 'Tribal',
+                          'Mooncloth', 'Shadoweave', 'Spellfire', 'Transmutation', 'Codex',
+                          'Glyph', 'Prospecting', 'Smelting', 'Tanning', 'Cogwheel', 'Tinker',
+                          'Jeeves', 'Blingtron', 'Explosive', 'Parachute', 'Pyrium', 'Truegold',
+                          'Trillium', 'Felsteel', 'Khorium', 'Adamantite', 'Thorium', 'Arcanite',
+                          'Mithril', 'Saronite', 'Cobalt', 'Titanium', 'Obsidium', 'Elementium'],
+
+            factions: ['Alliance', 'Horde', 'Zandalar', 'Timbermaw', 'Klaxxi', 'Tillers',
+                       'Anglers', 'Frostwolf', 'Steamwheedle', 'Ramkahen', 'Therazane',
+                       'Dragonmaw', 'Nightfallen', 'Valarjar', 'Wardens', 'Tortollan',
+                       'Rustbolt', 'Waveblade', 'Unshackled', 'Rajani', 'Uldum', 'Ascended',
+                       'Undying', 'Avowed', 'Stitchmasters', 'Marasmius', 'Enlightened',
+                       'Death', 'Brokers', 'Resonance', 'Accord', 'Loamm', 'Sabellian',
+                       'Obsidian', 'Cobalt', 'Artisan', 'Consortium', 'Valiance', 'Horde',
+                       'Conquest', 'Dominion', 'Sunreaver', 'Kirin', 'Shado', 'August']
+        };
+
+        const DUNGEON_ABBREVIATIONS = {
+            "Eco-Dome Al'dani": 'EDA',
+            'Ara-Kara, City of Threads': 'ARAK',
+            'The Dawnbreaker': 'DAWN',
+            'Operation: Floodgate': 'FLOOD',
+            'Priory of the Sacred Flame': 'PSF',
+            "Tazavesh: Streets of Wonder": 'STRT',
+            "Tazavesh: So'leah's Gambit": 'GMBT',
+            'Halls of Atonement': 'HOA'
+        };
+
+        let autoGroupNameTag = '';
+
+        function generateRandomTag(length = 2) {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+
+            for (let i = 0; i < length; i++) {
+                result += letters.charAt(Math.floor(Math.random() * letters.length));
+            }
+
+            return result;
+        }
+
+        function ensureAutoGroupName(options = {}) {
+            const { forceNewTag = false } = options;
+
+            if (forceNewTag || !autoGroupNameTag) {
+                autoGroupNameTag = generateRandomTag();
+            }
+
+            const dungeonSelect = document.getElementById('dungeon');
+            const keyLevelInput = document.getElementById('keyLevel');
+            const dungeonName = dungeonSelect ? dungeonSelect.value : '';
+            const parsedKeyLevel = parseInt(keyLevelInput && keyLevelInput.value, 10);
+            const keyLevel = !Number.isNaN(parsedKeyLevel) && parsedKeyLevel > 0 ? parsedKeyLevel : 12;
+
+            const parts = ['NOP', autoGroupNameTag];
+            const abbreviation = DUNGEON_ABBREVIATIONS[dungeonName];
+
+            if (abbreviation) parts.push(abbreviation);
+            if (keyLevel) parts.push(keyLevel);
+
+            return parts.join(' ');
+        }
+
+        function handleGroupNameInput() { generateOutput(); }
+
+        function handleAutoGroupNameDependencyChange() { generateOutput(); }
+
+        function generatePassword() {
+            const categories = Object.values(wowWords);
+            const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+            const randomWord = randomCategory[Math.floor(Math.random() * randomCategory.length)];
+            const randomNumber = Math.floor(Math.random() * 100);
+            return `${randomWord}${randomNumber}`;
+        }
+
+        // Generate preview on most field edits. Individual key listeners are added on load.
+
+        function toggleRole(roleId) {
+            const checkbox = document.getElementById(`role-${roleId}`);
+            checkbox.checked = !checkbox.checked;
+
+            const roleOption = checkbox.closest('.role-option');
+            if (checkbox.checked) {
+                roleOption.classList.add('selected');
+            } else {
+                roleOption.classList.remove('selected');
+            }
+
+            updateRoles();
+        }
+
+        function updateRoles() {
+            // Update selected state visually
+            ['tank', 'healer', 'dps'].forEach(role => {
+                const checkbox = document.getElementById(`role-${role}`);
+                const roleOption = checkbox.closest('.role-option');
+                if (checkbox.checked) {
+                    roleOption.classList.add('selected');
+                } else {
+                    roleOption.classList.remove('selected');
+                }
+            });
+
+            generateOutput();
+        }
+
+        function updateQuickRequirements() {
+            const options = document.querySelectorAll('#quick-reqs .quick-req-option');
+            options.forEach(opt => {
+                const cb = opt.querySelector('input[type="checkbox"]');
+                opt.classList.toggle('selected', !!(cb && cb.checked));
+            });
+            generateOutput();
+        }
+
+        function gatherQuickRequirements(keyLevel) {
+            const picks = [];
+            const lust = document.getElementById('qreq-lust')?.checked;
+            const cr = document.getElementById('qreq-cr')?.checked;
+            const chill = document.getElementById('qreq-chill')?.checked;
+            const voice = document.getElementById('qreq-voice')?.checked;
+            const cons = document.getElementById('qreq-consumables')?.checked;
+            const tminus1 = document.getElementById('qreq-timedminus1')?.checked;
+
+            if (lust) picks.push('Lust/Hero');
+            if (cr) picks.push('Battle Res (CR)');
+            if (voice) picks.push('Voice comms');
+            if (cons) picks.push('Pots/enchants');
+            if (chill) picks.push('Chill vibes');
+
+            if (tminus1) {
+                const target = Math.max(2, (parseInt(keyLevel, 10) || 12) - 1);
+                picks.push(`Have +${target} timed`);
+            }
+
+            return picks;
+        }
+
+        function generateOutput() {
+            const groupNameInput = document.getElementById('groupName');
+            const dungeonSelect = document.getElementById('dungeon');
+            const keyLevelInput = document.getElementById('keyLevel');
+
+            const userText = groupNameInput ? groupNameInput.value.trim() : '';
+            let groupName = userText || ensureAutoGroupName();
+
+            const dungeon = dungeonSelect ? dungeonSelect.value : '';
+            const parsedKeyLevel = parseInt(keyLevelInput && keyLevelInput.value, 10);
+            const keyLevel = !Number.isNaN(parsedKeyLevel) && parsedKeyLevel > 0 ? parsedKeyLevel : 12;
+            const timing = document.getElementById('timing').value;
+            const requirements = document.getElementById('requirements').value;
+
+            // Auto-generate password if empty
+            let password = document.getElementById('password').value.trim();
+            if (!password) {
+                password = generatePassword();
+            }
+
+            // Build dungeon & difficulty string
+            let dungeonText = '';
+            if (dungeon && keyLevel) {
+                dungeonText = `${dungeon} +${keyLevel}`;
+            } else if (dungeon) {
+                dungeonText = dungeon;
+            } else if (keyLevel) {
+                dungeonText = `+${keyLevel}`;
+            }
+
+            // Determine role tag suffix based on key level
+            const roleSuffix = keyLevel >= 15 ? 'M15+' : 'M12-14';
+
+            // Build looking for string with Discord role mentions
+            let lookingForParts = [];
+
+            const roles = [
+                { id: 'tank', tag: 'TANK' },
+                { id: 'healer', tag: 'HEALER' },
+                { id: 'dps', tag: 'DPS' }
+            ];
+
+            roles.forEach(role => {
+                const checkbox = document.getElementById(`role-${role.id}`);
+                const count = parseInt(document.getElementById(`count-${role.id}`).value, 10) || 0;
+
+                if (checkbox.checked && count > 0) {
+                    const roleTag = `@${role.tag}-${roleSuffix}`;
+                    lookingForParts.push(`${count}x ${roleTag}`);
+                }
+            });
+
+            const lookingFor = lookingForParts.length > 0 ? lookingForParts.join(', ') : '';
+
+            // Build specific requirements from quick picks + freeform text
+            const quickReqs = gatherQuickRequirements(keyLevel);
+            const reqText = (requirements || '').trim();
+            const combinedRequirements = [quickReqs.join(', '), reqText].filter(Boolean).join(' • ');
+
+            // Build the output string
+            let output = '';
+            output += `- \`Group Name:\` ${groupName}\n`;
+            output += `- \`Dungeon & difficulty:\` ${dungeonText}\n`;
+            output += `- \`Timing expectations:\` ${timing}\n`;
+            output += `- \`Looking for:\` ${lookingFor}\n`;
+            output += `- \`Specific Requirements:\` ${combinedRequirements}\n`;
+            output += `- \`Password:\` ${password}`;
+
+            document.getElementById('output').textContent = output;
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output').textContent;
+
+            if (!output || output.includes('Fill in the form')) {
+                return;
+            }
+
+            navigator.clipboard.writeText(output).then(() => {
+                // Show copy indicator
+                const indicator = document.getElementById('copyIndicator');
+                indicator.classList.add('show');
+
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert('Failed to copy to clipboard. Please copy manually.');
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('groupForm').reset();
+
+            // Refresh the session tag but do not write into the field.
+            ensureAutoGroupName({ forceNewTag: true });
+
+            // Uncheck all role checkboxes and remove selected class
+            ['tank', 'healer', 'dps'].forEach(role => {
+                const checkbox = document.getElementById(`role-${role}`);
+                checkbox.checked = false;
+                checkbox.closest('.role-option').classList.remove('selected');
+            });
+
+            document.getElementById('output').innerHTML = '<span style="color: var(--text-muted);">Fill in the form and click "Generate" to create your group listing...</span>';
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            const groupNameInput = document.getElementById('groupName');
+            const dungeonSelect = document.getElementById('dungeon');
+            const keyLevelInput = document.getElementById('keyLevel');
+            const quickReqsContainer = document.getElementById('quick-reqs');
+
+            // Prepare an initial random tag, but keep the field blank.
+            ensureAutoGroupName({ forceNewTag: true });
+
+            if (groupNameInput) groupNameInput.addEventListener('input', handleGroupNameInput);
+            if (dungeonSelect) dungeonSelect.addEventListener('change', handleAutoGroupNameDependencyChange);
+            if (keyLevelInput) {
+                keyLevelInput.addEventListener('input', handleAutoGroupNameDependencyChange);
+                keyLevelInput.addEventListener('change', handleAutoGroupNameDependencyChange);
+            }
+            if (quickReqsContainer) {
+                quickReqsContainer.addEventListener('change', updateQuickRequirements);
+                quickReqsContainer.addEventListener('input', updateQuickRequirements);
+                quickReqsContainer.addEventListener('click', (e) => {
+                    const option = e.target.closest('.quick-req-option');
+                    if (!option) return;
+                    const isControl = e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL';
+                    if (isControl) return; // default handling
+                    const cb = option.querySelector('input[type="checkbox"]');
+                    if (cb) {
+                        cb.checked = !cb.checked;
+                        updateQuickRequirements();
+                    }
+                });
+                updateQuickRequirements();
+            }
+
+            // Prevent accidental form submission via Enter
+            const form = document.getElementById('groupForm');
+            if (form) {
+                form.addEventListener('submit', (e) => e.preventDefault());
+            }
+
+            // Generate initial output
+            generateOutput();
+        });
+    </script>
+</body>
+</html>
