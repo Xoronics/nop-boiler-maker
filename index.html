@@ -519,7 +519,7 @@
 
                     <div class="form-group">
                         <label for="password">Group Password</label>
-                        <input type="text" id="password" placeholder="Leave empty to auto-generate (e.g., Thrall42)" autocomplete="off" spellcheck="false">
+                        <input type="text" id="password" placeholder="Leave empty to auto-generate (e.g., Thrall-42)" autocomplete="off" spellcheck="false">
                     </div>
 
                     <div class="button-group">
@@ -729,8 +729,8 @@
             const categories = Object.values(wowWords);
             const randomCategory = categories[Math.floor(Math.random() * categories.length)];
             const randomWord = randomCategory[Math.floor(Math.random() * randomCategory.length)];
-            const randomNumber = Math.floor(Math.random() * 100);
-            return `${randomWord}${randomNumber}`;
+            const randomNumber = Math.floor(Math.random() * 10000) + 1;
+            return `${randomWord}-${randomNumber}`;
         }
 
         // Generate preview on most field edits. Individual key listeners are added on load.
