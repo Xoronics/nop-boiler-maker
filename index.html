@@ -514,10 +514,6 @@
                                 <input type="checkbox" id="qreq-voice">
                                 <label for="qreq-voice">Voice comms</label>
                             </div>
-                            <div class="quick-req-option">
-                                <input type="checkbox" id="qreq-consumables">
-                                <label for="qreq-consumables">Pots/enchants</label>
-                            </div>
                         </div>
                     </div>
 
@@ -783,13 +779,11 @@
             const cr = document.getElementById('qreq-cr')?.checked;
             const chill = document.getElementById('qreq-chill')?.checked;
             const voice = document.getElementById('qreq-voice')?.checked;
-            const cons = document.getElementById('qreq-consumables')?.checked;
             const tminus1 = document.getElementById('qreq-timedminus1')?.checked;
 
             if (lust) picks.push('Lust/Hero');
             if (cr) picks.push('Battle Res (CR)');
             if (voice) picks.push('Voice comms');
-            if (cons) picks.push('Pots/enchants');
             if (chill) picks.push('Chill vibes');
 
             if (tminus1) {
